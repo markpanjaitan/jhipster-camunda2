@@ -116,12 +116,14 @@ spring:
       client:
         provider:
           oidc:
-            issuer-uri: http://localhost:9080/realms/jhipster
+            issuer-uri: http://localhost:18080/auth/realms/camunda-platform
         registration:
           oidc:
-            client-id: web_app
-            client-secret: web_app
-            scope: openid, profile, email, offline_access # last one for refresh tokens
+            client-id: jhipster
+            client-secret: Zmf3n904DKollW8oxH7z3nDtPjiSPtnZ
+            redirect-uri: 'http://localhost:8080/login/oauth2/code/oidc'
+            scope: openid, email
+            authorization-grant-type: authorization_code
   task:
     execution:
       thread-name-prefix: jhipster-camunda-task-
@@ -190,6 +192,7 @@ jhipster:
       audience:
         - account
         - api://default
+        - tasklist-api
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class

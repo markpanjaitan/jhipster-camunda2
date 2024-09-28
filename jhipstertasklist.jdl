@@ -1,0 +1,13 @@
+application {
+  entities TaskList
+}
+
+entity TaskList {
+  taskDefinitionId String required
+  name String required
+  processName String required
+  taskState String
+}
+
+// Disable pagination for this entity
+dto TaskList with mapstruct

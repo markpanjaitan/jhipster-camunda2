@@ -202,6 +202,27 @@
             <version>${mapstruct.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+          <groupId>org.camunda.bpm.model</groupId>
+          <artifactId>camunda-bpmn-model</artifactId>
+          <version>7.21.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.camunda.bpm.model/camunda-dmn-model -->
+        <dependency>
+          <groupId>org.camunda.bpm.model</groupId>
+          <artifactId>camunda-dmn-model</artifactId>
+          <version>7.21.0</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-csv</artifactId>
+          <version>1.11.0</version>
+        </dependency>
+        <dependency>
+          <groupId>com.opencsv</groupId>
+          <artifactId>opencsv</artifactId>
+          <version>5.9</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -475,10 +496,7 @@
                     </executions>
                     <configuration>
                         <mainClass>${start-class}</mainClass>
-                        <!--
-                        Enable the line below to have remote debugging of your application on port 5005
                         <jvmArguments>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</jvmArguments>
-                        -->
                     </configuration>
                 </plugin>
                 <plugin>

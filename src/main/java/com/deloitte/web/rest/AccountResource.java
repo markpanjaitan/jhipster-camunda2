@@ -3,6 +3,7 @@ package com.deloitte.web.rest;
 import com.deloitte.security.SecurityUtils;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,6 +43,10 @@ public class AccountResource {
     @GetMapping("/account")
     public UserVM getAccount(Principal principal) {
         if (principal instanceof AbstractAuthenticationToken) {
+            AbstractAuthenticationToken auth = (AbstractAuthenticationToken) principal;
+            Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+            authorities.forEach(authority -> System.out.println(authority.getAuthority()));
+
             return getUserFromAuthentication((AbstractAuthenticationToken) principal);
         } else {
             throw new AccountResourceException("User could not be found");

@@ -17,6 +17,12 @@ export const PrivateRoute = ({ children, hasAnyAuthorities = [], ...rest }: IOwn
   const isAuthorized = hasAnyAuthority(account.authorities, hasAnyAuthorities);
   const pageLocation = useLocation();
 
+  /* eslint-disable no-console */
+  console.log('isAuthenticated = ', isAuthenticated);
+  console.log('isAuthorized = ', isAuthorized);
+  console.log('account = ', account);
+  /* eslint-enable no-console */
+
   if (!children) {
     throw new Error(`A component needs to be specified for private route for path ${(rest as any).path}`);
   }

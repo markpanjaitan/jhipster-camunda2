@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
@@ -124,12 +125,23 @@ public class SecurityConfiguration {
         return jwtAuthenticationConverter;
     }
 
+    @Bean
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
         final OidcUserService delegate = new OidcUserService();
 
         return userRequest -> {
             OidcUser oidcUser = delegate.loadUser(userRequest);
-            return new DefaultOidcUser(oidcUser.getAuthorities(), oidcUser.getIdToken(), oidcUser.getUserInfo(), PREFERRED_USERNAME);
+            Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+
+            // Extract roles from the user info
+            if (oidcUser.getUserInfo().getClaims().containsKey("roles")) {
+                List<String> roles = (List<String>) oidcUser.getUserInfo().getClaims().get("roles");
+                for (String role : roles) {
+                    mappedAuthorities.add(new SimpleGrantedAuthority(role));
+                }
+            }
+
+            return new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo(), PREFERRED_USERNAME);
         };
     }
 
