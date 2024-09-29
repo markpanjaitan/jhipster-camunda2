@@ -1,0 +1,316 @@
+{
+  "info": {
+    "_postman_id": "871f0c6d-17aa-4a4b-9969-ac20759dddd1",
+    "name": "Camunda - Tasklist",
+    "description": "Postman collection to access Tasklist REST API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "38088355"
+  },
+  "item": [
+    {
+      "name": "Keycloak - Generate JWT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = JSON.parse(pm.response.text());\r",
+              "pm.environment.set(\"camunda_token\", jsonData[\"access_token\"])"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "client_id",
+              "value": "{{token_client_id}}",
+              "type": "text"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{token_client_secret}}",
+              "type": "text"
+            },
+            {
+              "key": "grant_type",
+              "value": "client_credentials",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:18080/auth/realms/camunda-platform/protocol/openid-connect/token",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "18080",
+          "path": ["auth", "realms", "camunda-platform", "protocol", "openid-connect", "token"]
+        },
+        "description": "Generated from cURL: curl --location --request POST 'http://localhost:18080/auth/realms/camunda-platform/protocol/openid-connect/token' \\\r\n--header 'Content-Type: application/x-www-form-urlencoded' \\\r\n--data-urlencode \"client_id=${CLIENT_ID}\" \\\r\n--data-urlencode \"client_secret=${CLIENT_SECRET}\" \\\r\n--data-urlencode 'grant_type=client_credentials'"
+      },
+      "response": []
+    },
+    {
+      "name": "Tasklist - Get All Open Task",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{camunda_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"sort\": [\r\n        {\r\n            \"field\": \"creationTime\",\r\n            \"order\": \"DESC\"\r\n        }\r\n    ],\r\n    \"pageSize\": 50,\r\n    \"state\": \"CREATED\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8082/v1/tasks/search",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8082",
+          "path": ["v1", "tasks", "search"]
+        },
+        "description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://localhost:8082/v1/tasks/search' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\"sort\":[{\"field\":\"creationTime\",\"order\":\"DESC\"}],\"pageSize\":50,\"state\":\"CREATED\"}'"
+      },
+      "response": []
+    },
+    {
+      "name": "Tasklist - Get Current User",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{camunda_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8082/v1/internal/users/current",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8082",
+          "path": ["v1", "internal", "users", "current"]
+        },
+        "description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://localhost:8082/v1/tasks/search' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\"sort\":[{\"field\":\"creationTime\",\"order\":\"DESC\"}],\"pageSize\":50,\"state\":\"CREATED\"}'"
+      },
+      "response": []
+    },
+    {
+      "name": "Tasklist - Get Form Information",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{camunda_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8082/v1/forms/Form_0tgacw2?processDefinitionKey=2251799814208398&version=2",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8082",
+          "path": ["v1", "forms", "Form_0tgacw2"],
+          "query": [
+            {
+              "key": "processDefinitionKey",
+              "value": "2251799814208398"
+            },
+            {
+              "key": "version",
+              "value": "2"
+            }
+          ]
+        },
+        "description": "Generated from cURL: curl -X 'GET' \\\r\n  'http://localhost:8082/v1/forms/$formId?processDefinitionKey=$processDefinitionKey' \\\r\n  -H 'accept: application/json'"
+      },
+      "response": []
+    },
+    {
+      "name": "Identity - Create Role",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{camunda_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"Assignee1\",\r\n    \"description\": \"User can only assign a tasklist\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8084/api/roles",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8084",
+          "path": ["api", "roles"]
+        },
+        "description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://localhost:8082/v1/tasks/search' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\"sort\":[{\"field\":\"creationTime\",\"order\":\"DESC\"}],\"pageSize\":50,\"state\":\"CREATED\"}'"
+      },
+      "response": []
+    },
+    {
+      "name": "Identity - Get Clients",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{camunda_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8084/api/clients",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8084",
+          "path": ["api", "clients"]
+        },
+        "description": "Generated from cURL: curl -X 'GET' \\\r\n  'http://localhost:8082/v1/forms/$formId?processDefinitionKey=$processDefinitionKey' \\\r\n  -H 'accept: application/json'"
+      },
+      "response": []
+    },
+    {
+      "name": "Tasklist - Assign a Task",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{camunda_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"assignee\": \"demo\",\r\n  \"allowOverrideAssignment\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8082/v1/tasks/2251799813789688/assign",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8082",
+          "path": ["v1", "tasks", "2251799813789688", "assign"]
+        },
+        "description": "Generated from cURL: curl -X 'PATCH' \\\r\n  'http://localhost:8082/v1/tasks/123/assign' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"assignee\": \"string\",\r\n  \"allowOverrideAssignment\": true\r\n}'"
+      },
+      "response": []
+    }
+  ]
+}
