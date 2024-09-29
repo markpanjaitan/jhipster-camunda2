@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0q93mdy" name="Approvers" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.26.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.5.0">
+  <decision id="Determine_Approver" name="Determine Approver(s)">
+    <decisionTable id="DecisionTable_0v36pue" hitPolicy="RULE ORDER">
+      <input id="Input_1" label="Amount">
+        <inputExpression id="InputExpression_1" typeRef="number">
+          <text>numPaymentAmount</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Approver" name="approver_list" typeRef="string" />
+      <rule id="DecisionRule_0u55sv6">
+        <inputEntry id="UnaryTests_1sxwjts">
+          <text>&gt;0</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1mkacq7">
+          <text>"Approver-1"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0vpjoqe">
+        <inputEntry id="UnaryTests_1spsnnd">
+          <text>&gt;=10000</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1osts0s">
+          <text>"Approver-2"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1iaozpm">
+        <inputEntry id="UnaryTests_1o8aw4i">
+          <text>&gt;=15000</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_00ngzpu">
+          <text>"Approver-3"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_18iu15l">
+        <inputEntry id="UnaryTests_0447qbg">
+          <text>&gt;=20000</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1fliwuj">
+          <text>"Approver-4"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="Determine_Approver">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

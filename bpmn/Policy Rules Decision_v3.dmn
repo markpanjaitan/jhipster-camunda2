@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="Definitions_0q93mdx" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.26.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.5.0" camunda:diagramRelationId="6beaca64-def9-4a85-aa93-b81472708334">
+  <decision id="Policy_Decision" name="Policy Rules Decision">
+    <decisionTable id="DecisionTable_1thb1ga">
+      <input id="Input_1" label="Amount" biodi:width="192">
+        <inputExpression id="InputExpression_1" typeRef="number">
+          <text>numPaymentAmount</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_01lr453" label="Product">
+        <inputExpression id="LiteralExpression_0q9qmx7" typeRef="string">
+          <text>strProduct</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Policy" name="strPolicy" typeRef="string" />
+      <rule id="DecisionRule_1i8pc9b">
+        <inputEntry id="UnaryTests_1fkxk9e">
+          <text>&lt;=10000</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16s3dqe">
+          <text>"GIRO"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0xymldc">
+          <text>"P1"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0pyaa98">
+        <inputEntry id="UnaryTests_066a7ih">
+          <text>&lt;=10000</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x5hpsp">
+          <text>"IBG"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_09o9ltm">
+          <text>"P2"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0b8vdpy">
+        <inputEntry id="UnaryTests_0p9h6n6">
+          <text>&gt;10000</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1w0i8oo">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1etytg0">
+          <text>"P3"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="Policy_Decision">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
