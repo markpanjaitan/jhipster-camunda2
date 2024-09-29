@@ -1,0 +1,26 @@
+{
+  "jhipsterApp": {
+    "csvFile": {
+      "home": {
+        "title": "Csv Files",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Csv File",
+        "createOrEditLabel": "Create or edit a Csv File",
+        "notFound": "No Csv Files found"
+      },
+      "created": "A new Csv File is created with identifier {{ param }}",
+      "updated": "A Csv File is updated with identifier {{ param }}",
+      "deleted": "A Csv File is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Csv File {{ id }}?"
+      },
+      "detail": {
+        "title": "Csv File"
+      },
+      "id": "ID",
+      "file": "File",
+      "createdDate": "Created Date",
+      "updatedDate": "Updated Date"
+    }
+  }
+}
