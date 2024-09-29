@@ -141,6 +141,23 @@ public class SecurityConfiguration {
                 }
             }
 
+            // hardcode role by name
+            List<String> roles = new ArrayList<>();
+            String fullName = oidcUser.getUserInfo().getFullName().toLowerCase();
+            if (fullName.contains("assignee")) {
+                roles.add(AuthoritiesConstants.ASSGINEE);
+                roles.add(AuthoritiesConstants.USER);
+            } else if (fullName.contains("approver")) {
+                roles.add(AuthoritiesConstants.APPROVER);
+                roles.add(AuthoritiesConstants.USER);
+            } else {
+                // You can add more roles or default roles here
+                roles.add(AuthoritiesConstants.ANONYMOUS);
+            }
+            for (String role : roles) {
+                mappedAuthorities.add(new SimpleGrantedAuthority(role));
+            }
+
             return new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo(), PREFERRED_USERNAME);
         };
     }
