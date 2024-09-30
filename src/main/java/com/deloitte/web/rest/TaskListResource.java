@@ -5,6 +5,9 @@ import com.deloitte.service.CamundaTaskService;
 import com.deloitte.service.dto.AssignmentDto;
 import com.deloitte.service.dto.TaskListDto;
 import com.deloitte.service.dto.VariableDto;
+import com.deloitte.service.dto.VariableWrapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -129,18 +132,23 @@ public class TaskListResource {
     }
 
     @PatchMapping("/tasks/{taskId}/complete")
-    public ResponseEntity<String> completeTask(@PathVariable String taskId, Principal principal, @RequestBody List<VariableDto> variables) {
+    public ResponseEntity<String> completeTask(@PathVariable String taskId, @RequestBody String strVariables, Principal principal) {
         LOG.debug("REST request to complete task: {}", taskId);
 
         try {
             // Get the user ID from the Principal
-            String userId = principal.getName(); // Assuming the user ID is the principal name
+            String userId = principal.getName();
 
             // Fetch the access token if needed
             String accessToken = authService.getAccessToken();
 
+            //            // Convert strVariables JSON string to VariableWrapper
+            //            ObjectMapper objectMapper = new ObjectMapper();
+            //            VariableWrapper variableWrapper = objectMapper.readValue(strVariables, VariableWrapper.class);
+            //            List<VariableDto> variables = variableWrapper.getVariables();
+
             // Call service to complete the task with variables
-            taskService.completeTask(accessToken, taskId, variables, userId);
+            taskService.completeTask(accessToken, taskId, strVariables, userId);
 
             return ResponseEntity.ok("Task completed successfully: " + taskId);
         } catch (Exception e) {

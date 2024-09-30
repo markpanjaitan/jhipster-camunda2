@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { completeTask } from 'app/entities/task-list/task-list.reducer';
+import { AppDispatch } from 'app/config/store';
+import { useDispatch } from 'react-redux';
 
 interface Component {
   text?: string;
@@ -20,15 +22,12 @@ interface Schema {
 
 const TaskListForm: React.FC = () => {
   const location = useLocation();
-  const { schema } = location.state || {}; // Access schema from location state
+  const { schema: formSchema, taskId } = location.state || {};
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const dispatch: AppDispatch = useDispatch();
 
-  if (!schema) {
-    return <p>No schema provided!</p>; // Handle case where schema is not available
-  }
-
-  const components = schema.components;
+  const components = formSchema?.components || [];
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => ({
@@ -37,16 +36,50 @@ const TaskListForm: React.FC = () => {
     }));
   };
 
+  const createVariables = (schema: string, selectedValues: { [key: string]: any }) => {
+    const parsedSchema = JSON.parse(schema);
+    const variables = [];
+
+    parsedSchema.components.forEach(component => {
+      if (component.key) {
+        const selectedValue = selectedValues[component.key];
+        if (selectedValue !== undefined) {
+          variables.push({
+            name: component.key,
+            value: JSON.stringify(selectedValue),
+          });
+        }
+      }
+    });
+
+    return {
+      variables,
+    };
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    axios
-      .post('/api/submit', formData)
-      .then(() => {
+    submitForm();
+  };
+
+  const submitForm = async () => {
+    try {
+      const selectedValues = { ...formData };
+      const variableData = createVariables(JSON.stringify(formSchema), selectedValues);
+
+      console.log('selectedValues =', selectedValues);
+      console.log('variableData =', variableData);
+
+      const resultAction = await dispatch(completeTask({ taskId, strVariables: JSON.stringify(variableData) })); // Ensure to stringify
+
+      if (completeTask.fulfilled.match(resultAction)) {
         alert('Form submitted successfully!');
-      })
-      .catch(() => {
-        setError('Failed to submit form');
-      });
+      } else {
+        throw new Error(resultAction.error.message);
+      }
+    } catch (error) {
+      setFormError('Failed to submit form: ' + error.message);
+    }
   };
 
   const renderComponent = (component: Component) => {
@@ -87,12 +120,32 @@ const TaskListForm: React.FC = () => {
             {component.description && <small>{component.description}</small>}
           </div>
         );
+      case 'select': // Changed 'dropdown' to 'select' to match schema
+        return (
+          <div key={component.id}>
+            <label>{component.label}</label>
+            <select
+              value={formData[component.key] || ''} // Set the selected value
+              onChange={e => handleChange(component.key || '', e.target.value)}
+            >
+              <option value="" disabled>
+                Select an option
+              </option>
+              {component.values?.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {component.description && <small>{component.description}</small>}
+          </div>
+        );
       default:
         return null;
     }
   };
 
-  if (error) return <p>Error: {error}</p>;
+  if (formError) return <p>Error: {formError}</p>;
 
   return (
     <form onSubmit={handleSubmit}>

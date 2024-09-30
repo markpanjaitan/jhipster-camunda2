@@ -55,7 +55,8 @@ export const TaskList = () => {
 
         if (fetchFormData.fulfilled.match(resultAction)) {
           const schema = resultAction.payload;
-          navigate(`/task-list/form/${formId}/${processDefinitionKey}/${version}`, { state: { schema } });
+          // Pass processDefinitionKey in state
+          navigate(`/task-list/form/${formId}/${processDefinitionKey}/${version}`, { state: { schema, taskId } });
         } else {
           throw new Error(resultAction.error.message);
         }

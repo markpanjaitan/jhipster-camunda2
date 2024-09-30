@@ -202,7 +202,7 @@ public class CamundaTaskService {
         }
     }
 
-    public void completeTask(String accessToken, String taskId, List<VariableDto> variables, String userId) {
+    public void completeTask(String accessToken, String taskId, String strVariables, String userId) {
         String requestUrl = String.format("%s/%s/complete", taskListBaseUrl, taskId);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
@@ -210,18 +210,17 @@ public class CamundaTaskService {
             httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
             httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(variables);
-            httpPatch.setEntity(new StringEntity(json, org.apache.hc.core5.http.ContentType.APPLICATION_JSON));
+            // Set the strVariables as the request entity
+            httpPatch.setEntity(new StringEntity(strVariables, ContentType.APPLICATION_JSON));
 
             try (CloseableHttpResponse response = httpClient.execute(httpPatch)) {
                 // Check for 200 OK or 204 No Content
                 if (response.getCode() != HttpStatus.SC_OK && response.getCode() != HttpStatus.SC_NO_CONTENT) {
-                    throw new RuntimeException("Failed to assign task: " + response.getReasonPhrase());
+                    throw new RuntimeException("Failed to complete task: " + response.getReasonPhrase());
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error assigning task", e);
+            throw new RuntimeException("Error completing task", e);
         }
     }
 }

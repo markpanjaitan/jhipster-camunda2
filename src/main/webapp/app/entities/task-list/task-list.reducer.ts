@@ -43,13 +43,17 @@ export const assignTask = createAsyncThunk<string, { taskId: string }>(
   { serializeError: serializeAxiosError },
 );
 
-// New async action to complete a task
-export const completeTask = createAsyncThunk<string, { taskId: string }>(
-  'taskList/assign_task',
-  async ({ taskId }) => {
+export const completeTask = createAsyncThunk<string, { taskId: string; strVariables: string }>(
+  'taskList/complete_task',
+  async ({ taskId, strVariables }) => {
     const requestUrl = `/api/task-lists/tasks/${taskId}/complete`;
-    const response = await axios.patch<string>(requestUrl);
-    return response.data; // Assuming this is the response message from the server
+    const response = await axios.patch<string>(requestUrl, strVariables, {
+      // Ensure strVariables is being sent
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
   },
   { serializeError: serializeAxiosError },
 );
