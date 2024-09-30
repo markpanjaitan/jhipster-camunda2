@@ -32,6 +32,28 @@ export const fetchFormData = createAsyncThunk<string, { formId: string; processD
   { serializeError: serializeAxiosError },
 );
 
+// New async action to assign a task
+export const assignTask = createAsyncThunk<string, { taskId: string }>(
+  'taskList/assign_task',
+  async ({ taskId }) => {
+    const requestUrl = `/api/task-lists/tasks/${taskId}/assign`;
+    const response = await axios.patch<string>(requestUrl);
+    return response.data; // Assuming this is the response message from the server
+  },
+  { serializeError: serializeAxiosError },
+);
+
+// New async action to complete a task
+export const completeTask = createAsyncThunk<string, { taskId: string }>(
+  'taskList/assign_task',
+  async ({ taskId }) => {
+    const requestUrl = `/api/task-lists/tasks/${taskId}/complete`;
+    const response = await axios.patch<string>(requestUrl);
+    return response.data; // Assuming this is the response message from the server
+  },
+  { serializeError: serializeAxiosError },
+);
+
 // Slice definition
 const taskListSlice = createSlice({
   name: 'taskList',

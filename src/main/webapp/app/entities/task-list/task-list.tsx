@@ -6,8 +6,14 @@ import { faSort, faSortDown, faSortUp } from '@fortawesome/free-solid-svg-icons'
 import { ASC, DESC } from 'app/shared/util/pagination.constants';
 import { overrideSortStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { fetchFormData, getEntities } from './task-list.reducer';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { assignTask, fetchFormData, getEntities } from './task-list.reducer';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
+
+// Custom JWT Payload interface
+interface CustomJwtPayload extends JwtPayload {
+  id: string; // Adjust type if necessary
+}
 
 export const TaskList = () => {
   const dispatch = useAppDispatch();
@@ -32,24 +38,32 @@ export const TaskList = () => {
     });
   };
 
-  const handleClick = (event, formId, processDefinitionKey, version) => {
-    handleAssignToMe(event, formId, processDefinitionKey, version);
+  const handleClick = (event, formId, processDefinitionKey, version, taskId) => {
+    handleAssignToMe(event, formId, processDefinitionKey, version, taskId);
   };
 
-  const handleAssignToMe = async (event, formId, processDefinitionKey, version) => {
+  const handleAssignToMe = async (event, formId, processDefinitionKey, version, taskId) => {
     event.preventDefault();
 
     try {
-      const resultAction = await dispatch(fetchFormData({ formId, processDefinitionKey, version }));
+      const assignResult = await dispatch(assignTask({ taskId }));
 
-      if (fetchFormData.fulfilled.match(resultAction)) {
-        const schema = resultAction.payload; // Assuming the payload contains the schema
-        navigate(`/task-list/form/${formId}/${processDefinitionKey}/${version}`, { state: { schema } });
+      if (assignTask.fulfilled.match(assignResult)) {
+        console.log('Task assigned successfully:', assignResult.payload);
+
+        const resultAction = await dispatch(fetchFormData({ formId, processDefinitionKey, version }));
+
+        if (fetchFormData.fulfilled.match(resultAction)) {
+          const schema = resultAction.payload;
+          navigate(`/task-list/form/${formId}/${processDefinitionKey}/${version}`, { state: { schema } });
+        } else {
+          throw new Error(resultAction.error.message);
+        }
       } else {
-        throw new Error(resultAction.error.message);
+        throw new Error(assignResult.error.message);
       }
     } catch (error) {
-      console.error('Error fetching form data:', error);
+      console.error('Error:', error);
     }
   };
 
@@ -100,7 +114,9 @@ export const TaskList = () => {
                   <td>
                     <Button
                       color="success"
-                      onClick={event => handleClick(event, taskListDto.formId, taskListDto.processDefinitionKey, taskListDto.formVersion)}
+                      onClick={event =>
+                        handleClick(event, taskListDto.formId, taskListDto.processDefinitionKey, taskListDto.formVersion, taskListDto.id)
+                      }
                     >
                       Assign to Me
                     </Button>

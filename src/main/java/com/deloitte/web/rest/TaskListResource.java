@@ -2,7 +2,11 @@ package com.deloitte.web.rest;
 
 import com.deloitte.service.CamundaAuthService;
 import com.deloitte.service.CamundaTaskService;
+import com.deloitte.service.dto.AssignmentDto;
 import com.deloitte.service.dto.TaskListDto;
+import com.deloitte.service.dto.VariableDto;
+import jakarta.validation.Valid;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -90,6 +94,58 @@ public class TaskListResource {
         } catch (Exception e) {
             LOG.error("Error fetching tasks: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching tasks: " + e.getMessage());
+        }
+    }
+
+    /**
+     * {@code PATCH  /tasks/{taskId}/assign} : Assign an assignee to a task.
+     *
+     * @param taskId the id of the task to assign
+     * @param principal the current user's authentication details
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} or {@code 400 (Bad Request)} if the assignment fails
+     */
+    @PatchMapping("/tasks/{taskId}/assign")
+    public ResponseEntity<String> assignTask(@PathVariable String taskId, Principal principal) {
+        LOG.debug("REST request to assign task: {}", taskId);
+
+        try {
+            // Get the user ID from the Principal
+            String userId = principal.getName(); // Assuming the user ID is the principal name
+
+            // Fetch the access token
+            String accessToken = authService.getAccessToken();
+
+            AssignmentDto assignmentDto = new AssignmentDto();
+            assignmentDto.setAssignee(principal.getName());
+            assignmentDto.setAllowOverrideAssignment(true);
+            // Call service to assign the task, passing the userId if needed
+            taskService.assignTask(accessToken, taskId, assignmentDto, userId);
+
+            return ResponseEntity.ok("Task assigned successfully: " + taskId);
+        } catch (Exception e) {
+            LOG.error("Error assigning task: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error assigning task: " + e.getMessage());
+        }
+    }
+
+    @PatchMapping("/tasks/{taskId}/complete")
+    public ResponseEntity<String> completeTask(@PathVariable String taskId, Principal principal, @RequestBody List<VariableDto> variables) {
+        LOG.debug("REST request to complete task: {}", taskId);
+
+        try {
+            // Get the user ID from the Principal
+            String userId = principal.getName(); // Assuming the user ID is the principal name
+
+            // Fetch the access token if needed
+            String accessToken = authService.getAccessToken();
+
+            // Call service to complete the task with variables
+            taskService.completeTask(accessToken, taskId, variables, userId);
+
+            return ResponseEntity.ok("Task completed successfully: " + taskId);
+        } catch (Exception e) {
+            LOG.error("Error completing task: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error completing task: " + e.getMessage());
         }
     }
 }

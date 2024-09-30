@@ -18,9 +18,9 @@ export const PrivateRoute = ({ children, hasAnyAuthorities = [], ...rest }: IOwn
   const pageLocation = useLocation();
 
   /* eslint-disable no-console */
-  console.log('isAuthenticated = ', isAuthenticated);
-  console.log('isAuthorized = ', isAuthorized);
-  console.log('account = ', account);
+  // console.log('isAuthenticated = ', isAuthenticated);
+  // console.log('isAuthorized = ', isAuthorized);
+  // console.log('account = ', account);
   /* eslint-enable no-console */
 
   if (!children) {

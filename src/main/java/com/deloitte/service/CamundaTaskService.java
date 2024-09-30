@@ -1,24 +1,32 @@
 package com.deloitte.service; //package com.deloitte.service;
 
-import com.deloitte.service.dto.FormResponseDto;
-import com.deloitte.service.dto.SortCriteria;
-import com.deloitte.service.dto.TaskListDto;
-import com.deloitte.service.dto.TaskSearchRequestDto;
+import com.deloitte.service.dto.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public class CamundaTaskService {
 
     @Value("${camunda.tasklist-url}")
-    private String taskListUrl;
+    private String taskListBaseUrl;
 
     @Value("${camunda.form-url}")
     private String formUrl;
@@ -49,7 +57,7 @@ public class CamundaTaskService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(taskListUrl, HttpMethod.POST, requestEntity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(taskListBaseUrl + "/search", HttpMethod.POST, requestEntity, String.class);
 
         // Process the response
         String jsonResponse = response.getBody();
@@ -128,5 +136,92 @@ public class CamundaTaskService {
         }
 
         return schema;
+    }
+
+    //    public void assignTask(String accessToken, String taskId, AssignmentDto assignmentDto) {
+    //        RestTemplate restTemplate = new RestTemplate();
+    //
+    //        // Construct the request URL
+    //        String requestUrl = String.format("%s/%s/assign", taskListBaseUrl, taskId);
+    //
+    //        // Set up the headers
+    //        HttpHeaders headers = new HttpHeaders();
+    //        headers.setContentType(MediaType.APPLICATION_JSON);
+    //        headers.set("Authorization", "Bearer " + accessToken);
+    //
+    //        // Create the request body with assignment data
+    //        ObjectMapper objectMapper = new ObjectMapper();
+    //        String requestBody;
+    //
+    //        try {
+    //            // Convert AssignmentDto to JSON
+    //            requestBody = objectMapper.writeValueAsString(assignmentDto);
+    //        } catch (JsonProcessingException e) {
+    //            throw new RuntimeException("Error serializing assignmentDto to JSON", e);
+    //        }
+    //
+    //        // Create the request entity
+    //        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+    //
+    //        // Make the PATCH request to assign the task
+    //        ResponseEntity<Void> response;
+    //        try {
+    //            response = restTemplate.exchange(requestUrl, HttpMethod.PATCH, requestEntity, Void.class);
+    //        } catch (HttpClientErrorException | HttpServerErrorException e) {
+    //            throw new RuntimeException("Error during PATCH request: " + e.getStatusCode() + " - " + e.getResponseBodyAsString(), e);
+    //        } catch (ResourceAccessException e) {
+    //            throw new RuntimeException("I/O error during PATCH request: " + e.getMessage(), e);
+    //        }
+    //
+    //        // Check the response status
+    //        if (response.getStatusCode() != HttpStatus.NO_CONTENT) {
+    //            throw new RuntimeException("Failed to assign task: " + response.getStatusCode());
+    //        }
+    //    }
+
+    public void assignTask(String accessToken, String taskId, AssignmentDto assignmentDto, String userId) {
+        String requestUrl = String.format("%s/%s/assign", taskListBaseUrl, taskId);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPatch httpPatch = new HttpPatch(requestUrl);
+            httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(assignmentDto);
+            httpPatch.setEntity(new StringEntity(json, org.apache.hc.core5.http.ContentType.APPLICATION_JSON));
+
+            try (CloseableHttpResponse response = httpClient.execute(httpPatch)) {
+                // Check for 200 OK or 204 No Content
+                if (response.getCode() != HttpStatus.SC_OK && response.getCode() != HttpStatus.SC_NO_CONTENT) {
+                    throw new RuntimeException("Failed to assign task: " + response.getReasonPhrase());
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error assigning task", e);
+        }
+    }
+
+    public void completeTask(String accessToken, String taskId, List<VariableDto> variables, String userId) {
+        String requestUrl = String.format("%s/%s/complete", taskListBaseUrl, taskId);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPatch httpPatch = new HttpPatch(requestUrl);
+            httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(variables);
+            httpPatch.setEntity(new StringEntity(json, org.apache.hc.core5.http.ContentType.APPLICATION_JSON));
+
+            try (CloseableHttpResponse response = httpClient.execute(httpPatch)) {
+                // Check for 200 OK or 204 No Content
+                if (response.getCode() != HttpStatus.SC_OK && response.getCode() != HttpStatus.SC_NO_CONTENT) {
+                    throw new RuntimeException("Failed to assign task: " + response.getReasonPhrase());
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error assigning task", e);
+        }
     }
 }

@@ -1,7 +1,7 @@
 package com.deloitte.web.rest;
 
 import com.deloitte.security.SecurityUtils;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.deloitte.service.dto.UserVM;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Map;
@@ -45,9 +45,13 @@ public class AccountResource {
         if (principal instanceof AbstractAuthenticationToken) {
             AbstractAuthenticationToken auth = (AbstractAuthenticationToken) principal;
             Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-            authorities.forEach(authority -> System.out.println(authority.getAuthority()));
 
-            return getUserFromAuthentication((AbstractAuthenticationToken) principal);
+            // Extract roles from authorities
+            Set<String> roles = authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
+
+            roles.forEach(role -> System.out.println(role)); // Print roles for debugging
+
+            return getUserFromAuthentication(auth, roles);
         } else {
             throw new AccountResourceException("User could not be found");
         }
@@ -65,49 +69,24 @@ public class AccountResource {
         return principal == null ? null : principal.getName();
     }
 
-    private static class UserVM {
-
-        private String login;
-        private Set<String> authorities;
-        private Map<String, Object> details;
-
-        UserVM(String login, Set<String> authorities, Map<String, Object> details) {
-            this.login = login;
-            this.authorities = authorities;
-            this.details = details;
-        }
-
-        public boolean isActivated() {
-            return true;
-        }
-
-        public Set<String> getAuthorities() {
-            return authorities;
-        }
-
-        public String getLogin() {
-            return login;
-        }
-
-        @JsonAnyGetter
-        public Map<String, Object> getDetails() {
-            return details;
-        }
-    }
-
-    private static UserVM getUserFromAuthentication(AbstractAuthenticationToken authToken) {
+    public static UserVM getUserFromAuthentication(AbstractAuthenticationToken authToken, Set<String> roles) {
         Map<String, Object> attributes;
+        String userId = null; // Variable to hold user ID
+
         if (authToken instanceof JwtAuthenticationToken) {
             attributes = ((JwtAuthenticationToken) authToken).getTokenAttributes();
+            userId = (String) attributes.get("sub"); // Adjust based on your JWT claims
         } else if (authToken instanceof OAuth2AuthenticationToken) {
             attributes = ((OAuth2AuthenticationToken) authToken).getPrincipal().getAttributes();
+            userId = (String) attributes.get("preferred_username"); // Adjust based on your OAuth claims
         } else {
             throw new IllegalArgumentException("AuthenticationToken is not OAuth2 or JWT!");
         }
 
         return new UserVM(
             authToken.getName(),
-            authToken.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()),
+            userId, // Pass user ID to UserVM
+            roles, // Pass roles to UserVM
             SecurityUtils.extractDetailsFromTokenAttributes(attributes)
         );
     }

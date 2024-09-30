@@ -134,29 +134,18 @@ public class SecurityConfiguration {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 
             // Extract roles from the user info
-            if (oidcUser.getUserInfo().getClaims().containsKey("roles")) {
-                List<String> roles = (List<String>) oidcUser.getUserInfo().getClaims().get("roles");
-                for (String role : roles) {
-                    mappedAuthorities.add(new SimpleGrantedAuthority(role));
+            if (oidcUser.getUserInfo().getClaims().containsKey("realm_access")) {
+                Map<String, Object> realmAccess = (Map<String, Object>) oidcUser.getUserInfo().getClaims().get("realm_access");
+                if (realmAccess.containsKey("roles")) {
+                    List<String> roles = (List<String>) realmAccess.get("roles");
+                    for (String role : roles) {
+                        mappedAuthorities.add(new SimpleGrantedAuthority(role));
+                    }
                 }
             }
 
-            // hardcode role by name
-            List<String> roles = new ArrayList<>();
-            String fullName = oidcUser.getUserInfo().getFullName().toLowerCase();
-            if (fullName.contains("assignee")) {
-                roles.add(AuthoritiesConstants.ASSGINEE);
-                roles.add(AuthoritiesConstants.USER);
-            } else if (fullName.contains("approver")) {
-                roles.add(AuthoritiesConstants.APPROVER);
-                roles.add(AuthoritiesConstants.USER);
-            } else {
-                // You can add more roles or default roles here
-                roles.add(AuthoritiesConstants.ANONYMOUS);
-            }
-            for (String role : roles) {
-                mappedAuthorities.add(new SimpleGrantedAuthority(role));
-            }
+            // You can keep the existing logic for adding more roles based on full name if needed
+            // (e.g., checking for "assignee" or "approver")
 
             return new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo(), PREFERRED_USERNAME);
         };

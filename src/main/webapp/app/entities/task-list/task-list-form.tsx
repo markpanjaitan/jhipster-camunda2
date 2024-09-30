@@ -96,7 +96,7 @@ const TaskListForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      {components.map(renderComponent)}
+      <div style={{ marginBottom: '20px' }}>{components.map(renderComponent)}</div>
       <button type="submit">Submit</button>
     </form>
   );
