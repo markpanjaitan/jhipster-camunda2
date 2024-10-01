@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.hc.client5.http.classic.methods.HttpPatch;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -33,7 +34,7 @@ public class CamundaTaskService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public List<TaskListDto> fetchTasks(String accessToken) {
+    public List<TaskListDto> fetchTasks(String accessToken, List<String> roles) {
         // Create a list to hold the DTOs
         List<TaskListDto> taskList = new ArrayList<>();
 
@@ -81,7 +82,20 @@ public class CamundaTaskService {
                 tl.setFormId(node.get("formId").asText());
                 tl.setProcessDefinitionKey(node.get("processDefinitionKey").asText());
                 tl.setFormVersion(node.get("formVersion").asText());
-                taskList.add(tl);
+
+                // Get candidate groups from the JSON node
+                List<String> candidateGroups = new ArrayList<>();
+                if (node.has("candidateGroups")) {
+                    for (JsonNode groupNode : node.get("candidateGroups")) {
+                        candidateGroups.add(groupNode.asText());
+                    }
+                }
+                tl.setCandidateGroups(candidateGroups);
+
+                // Check if the candidate groups match the roles
+                if (!Collections.disjoint(tl.getCandidateGroups(), roles)) {
+                    taskList.add(tl);
+                }
             }
 
             // Print the list of DTOs

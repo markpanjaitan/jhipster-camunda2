@@ -1,5 +1,6 @@
 package com.deloitte.web.rest;
 
+import com.deloitte.security.AuthoritiesConstants;
 import com.deloitte.service.CamundaAuthService;
 import com.deloitte.service.CamundaTaskService;
 import com.deloitte.service.dto.AssignmentDto;
@@ -11,13 +12,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -45,7 +50,7 @@ public class TaskListResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of taskLists in body.
      */
     @GetMapping("")
-    public List<TaskListDto> getAllTaskLists() {
+    public List<TaskListDto> getAllTaskLists(Principal principal) {
         LOG.debug("REST request to get all TaskLists");
         //return taskListRepository.findAll();
 
@@ -54,8 +59,12 @@ public class TaskListResource {
             // Fetch the access token
             String accessToken = authService.getAccessToken();
 
+            List<String> roles = extractRoles(principal);
+            // Normalize roles to match candidate groups
+            List<String> normalizedRoles = normalizeRoles(roles);
+
             // Fetch tasks from Camunda
-            tasksLists = taskService.fetchTasks(accessToken);
+            tasksLists = taskService.fetchTasks(accessToken, normalizedRoles);
             // Return the tasks as the response
             //return ResponseEntity.ok(tasks);
         } catch (Exception e) {
@@ -155,5 +164,40 @@ public class TaskListResource {
             LOG.error("Error completing task: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error completing task: " + e.getMessage());
         }
+    }
+
+    private List<String> extractRoles(Principal principal) {
+        // Assuming principal is of type OAuth2AuthenticationToken
+        if (principal instanceof OAuth2AuthenticationToken) {
+            OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) principal;
+
+            // Get the authorities and extract role names
+            return authToken.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    private List<String> normalizeRoles(List<String> roles) {
+        List<String> normalized = new ArrayList<>();
+        for (String role : roles) {
+            switch (role) {
+                case AuthoritiesConstants.ASSIGNEE:
+                    normalized.add("assignee");
+                    break;
+                case AuthoritiesConstants.APPROVER:
+                    normalized.add("approver");
+                    break;
+                case AuthoritiesConstants.USER:
+                    normalized.add("user");
+                    break;
+                case AuthoritiesConstants.ADMIN:
+                    normalized.add("admin");
+                    break;
+                // Add more mappings if necessary
+                default:
+                    normalized.add(role); // Add the role as-is if no mapping exists
+            }
+        }
+        return normalized;
     }
 }

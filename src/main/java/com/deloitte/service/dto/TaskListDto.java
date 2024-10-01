@@ -1,5 +1,7 @@
 package com.deloitte.service.dto;
 
+import java.util.List;
+
 public class TaskListDto {
 
     private String id;
@@ -19,6 +21,8 @@ public class TaskListDto {
     private String processDefinitionKey;
 
     private String formVersion;
+
+    private List<String> candidateGroups;
 
     public String getId() {
         return id;
@@ -90,5 +94,13 @@ public class TaskListDto {
 
     public void setFormVersion(String formVersion) {
         this.formVersion = formVersion;
+    }
+
+    public List<String> getCandidateGroups() {
+        return candidateGroups;
+    }
+
+    public void setCandidateGroups(List<String> candidateGroups) {
+        this.candidateGroups = candidateGroups;
     }
 }
