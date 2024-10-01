@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { completeTask } from 'app/entities/task-list/task-list.reducer';
 import { AppDispatch } from 'app/config/store';
 import { useDispatch } from 'react-redux';
@@ -26,6 +26,7 @@ const TaskListForm: React.FC = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [formError, setFormError] = useState<string | null>(null);
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
 
   const components = formSchema?.components || [];
 
@@ -74,6 +75,7 @@ const TaskListForm: React.FC = () => {
 
       if (completeTask.fulfilled.match(resultAction)) {
         alert('Form submitted successfully!');
+        navigate('/task-list');
       } else {
         throw new Error(resultAction.error.message);
       }
