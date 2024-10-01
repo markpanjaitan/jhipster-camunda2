@@ -82,7 +82,8 @@ jhipster:
 camunda:
   auth:
     token-url: http://localhost:18080/auth/realms/camunda-platform/protocol/openid-connect/token
-    client-id: my-app
-    client-secret: 30itG6dniPyi4NHk57nW1GvnMErgKe0l
-  tasklist-url: http://localhost:8082/v1/tasks/search
-  form-url: http://localhost:8082/v1/forms # Base URL for forms
+    client-id: jhipster
+    client-secret: bb6g1IHN0rfomNjjwwh8BsqSGvuXRz3r
+  # Base URL
+  tasklist-url: http://localhost:8082/v1/tasks
+  form-url: http://localhost:8082/v1/forms
